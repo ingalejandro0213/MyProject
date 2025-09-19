@@ -1,35 +1,49 @@
 <?php
 // Conexión a la base de datos
-include '../db/conexion.php';
+require_once '../db/conexion.php';
 
-// Obtener eventos
-$filtro = isset($_GET['filtro_fecha']) ? $_GET['filtro_fecha'] : null;
+// Filtro seguro por fecha (opcional)
+$filtro = isset($_GET['filtro_fecha']) ? trim($_GET['filtro_fecha']) : null;
 
+// Query base
+$sqlBase = "SELECT id, fecha, hora_inicio, hora_fin, responsable, area_sesion, actividad, creado_en 
+            FROM agenda_reservas ";
+
+// Ejecutar consulta (con o sin filtro) usando prepared statements
 if ($filtro) {
-    $sql = "SELECT id, fecha, hora_inicio, hora_fin, responsable, actividad 
-            FROM agenda_reservas 
-            WHERE fecha = '$filtro' 
-            ORDER BY hora_inicio";
+    $sql = $sqlBase . " WHERE fecha = ? ORDER BY hora_inicio";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $filtro);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
 } else {
-    $sql = "SELECT id, fecha, hora_inicio, hora_fin, responsable, actividad 
-            FROM agenda_reservas 
-            ORDER BY fecha, hora_inicio";
+    $sql = $sqlBase . " ORDER BY fecha, hora_inicio";
+    $result = $conn->query($sql);
 }
 
-$result = $conn->query($sql);
-
+// Construir eventos para FullCalendar
 $eventos = [];
-$tabla_eventos = [];
-
 while ($row = $result->fetch_assoc()) {
-    $eventos[] = [
-        'id' => $row['id'],
-        'title' => $row['actividad'] . " - " . $row['responsable'],
-        'start' => $row['fecha'] . 'T' . $row['hora_inicio'],
-        'end' => $row['fecha'] . 'T' . $row['hora_fin']
-    ];
+    // Asegurar formato ISO (agregar :00 si tu TIME viene HH:MM)
+    $inicio = preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $row['hora_inicio']) ? $row['hora_inicio'] : ($row['hora_inicio'] . ':00');
+    $fin    = preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $row['hora_fin'])    ? $row['hora_fin']    : ($row['hora_fin'] . ':00');
 
-    $tabla_eventos[] = $row; // Para mostrar en la tabla
+    $eventos[] = [
+        'id'    => (int)$row['id'],
+        'title' => $row['actividad'] . " — " . $row['responsable'],
+        'start' => $row['fecha'] . 'T' . $inicio,
+        'end'   => $row['fecha'] . 'T' . $fin,
+        'extendedProps' => [
+            'responsable' => $row['responsable'],
+            'area'        => $row['area_sesion'],
+            'actividad'   => $row['actividad'],
+            'creado_en'   => $row['creado_en'],
+            'fecha'       => $row['fecha'],
+            'hora_inicio' => $row['hora_inicio'],
+            'hora_fin'    => $row['hora_fin']
+        ]
+    ];
 }
 ?>
 <!DOCTYPE html>
@@ -37,14 +51,18 @@ while ($row = $result->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <title>Agenda Biblioteca</title>
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css' rel='stylesheet'>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js'></script>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/es.js'></script>
+
+    <!-- FullCalendar: usa los bundles global (evita 'FullCalendar undefined') -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
+
     <style>
-        #calendario {
-            min-height: 600px;
-        }
+        #calendario { min-height: 720px; background: #fff; border: 1px solid #e5e7eb; border-radius: .5rem; padding: .75rem; }
+        .fc .fc-toolbar-title { font-size: 1.15rem; }
     </style>
 </head>
 <body class="bg-light">
@@ -58,7 +76,7 @@ while ($row = $result->fetch_assoc()) {
         <a href="../dashboard_admin.php" class="btn btn-outline-primary">🏠 Volver a la página principal</a>
     </div>
 
-    <!-- Formulario -->
+    <!-- Formulario de creación -->
     <div class="card mb-4 shadow-sm">
         <div class="card-header bg-success text-white">Registrar nueva reserva</div>
         <div class="card-body">
@@ -83,7 +101,7 @@ while ($row = $result->fetch_assoc()) {
                     <label class="form-label">Área o Sección:</label>
                     <input type="text" name="area_sesion" class="form-control" required>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <label class="form-label">Actividad</label>
                     <textarea name="actividad" rows="2" class="form-control" required></textarea>
                 </div>
@@ -94,63 +112,36 @@ while ($row = $result->fetch_assoc()) {
         </div>
     </div>
 
-
-<!-- Filtro por fecha -->
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-warning text-dark">🔍 Filtrar por Fecha</div>
-    <div class="card-body">
-        <form method="GET" class="row g-3">
-            <div class="col-md-4">
-                <input type="date" name="filtro_fecha" class="form-control" value="<?php echo isset($_GET['filtro_fecha']) ? $_GET['filtro_fecha'] : ''; ?>" required>
-            </div>
-            <div class="col-md-4">
-                <button type="submit" class="btn btn-outline-primary">Aplicar Filtro</button>
-                <a href="agenda_biblioteca.php" class="btn btn-outline-secondary">Limpiar</a>
-            </div>
-            <div class="col-md-4">
-                <a href="exportar_excel.php<?php echo isset($_GET['filtro_fecha']) ? '?filtro_fecha=' . $_GET['filtro_fecha'] : ''; ?>" class="btn btn-success">📥 Exportar a Excel</a>
-            </div>
-        </form>
-    </div>
-</div>
-
-    <!-- Tabla de eventos -->
+    <!-- Filtro por fecha -->
     <div class="card shadow-sm mb-4">
-        <div class="card-header bg-info text-white">📄 Lista de Reservas</div>
+        <div class="card-header bg-warning text-dark">🔍 Filtrar por Fecha</div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped table-bordered">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>#</th>
-                            <th>Fecha</th>
-                            <th>Hora Inicio</th>
-                            <th>Hora Fin</th>
-                            <th>Responsable</th>
-                            <th>Actividad</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($tabla_eventos as $evento): ?>
-                            <tr>
-                                <td><?php echo $evento['id']; ?></td>
-                                <td><?php echo $evento['fecha']; ?></td>
-                                <td><?php echo $evento['hora_inicio']; ?></td>
-                                <td><?php echo $evento['hora_fin']; ?></td>
-                                <td><?php echo htmlspecialchars($evento['responsable']); ?></td>
-                                <td><?php echo htmlspecialchars($evento['actividad']); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                        <?php if (empty($tabla_eventos)): ?>
-                            <tr>
-                                <td colspan="6" class="text-center">No hay reservas registradas.</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <input type="date" name="filtro_fecha" class="form-control" value="<?php echo $filtro ? htmlspecialchars($filtro) : ''; ?>">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-outline-primary">Aplicar Filtro</button>
+                    <a href="agenda_biblioteca.php" class="btn btn-outline-secondary">Limpiar</a>
+                </div>
+                <div class="col-md-4">
+                    <a href="exportar_excel.php<?php echo $filtro ? '?filtro_fecha=' . urlencode($filtro) : ''; ?>" class="btn btn-success">📥 Exportar a Excel</a>
+                </div>
+            </form>
         </div>
     </div>
+
+    <!-- Calendario -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-primary text-white">🗓️ Calendario de Reservas</div>
+        <div class="card-body">
+            <div id="calendario"></div>
+            <?php if (empty($eventos)): ?>
+                <p class="text-center text-muted mt-3 mb-0">No hay reservas para mostrar.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
 
 <?php include '../footer.php'; ?>
 
@@ -158,23 +149,60 @@ while ($row = $result->fetch_assoc()) {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const calendarEl = document.getElementById('calendario');
+    const eventos = <?php echo json_encode($eventos, JSON_UNESCAPED_UNICODE); ?>;
+
+    if (!calendarEl) return;
+
+    // Si NO quieres que el usuario vea la lista, ya la eliminamos del HTML.
+    // Solo renderizamos el calendario:
     const calendar = new FullCalendar.Calendar(calendarEl, {
         locale: 'es',
+        timeZone: 'local',
         initialView: 'dayGridMonth',
-        height: "auto",
+        height: 'auto',
+        nowIndicator: true,
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
         },
-        events: <?php echo json_encode($eventos); ?>,
-        eventClick: function (info) {
-            alert("Actividad: " + info.event.title + "\nInicio: " + info.event.start.toLocaleString());
+        slotMinTime: '06:00:00',
+        slotMaxTime: '19:00:00',
+        expandRows: true,
+        navLinks: true,
+        weekNumbers: true,
+        selectable: false,
+        editable: false,
+        displayEventEnd: true,
+        events: eventos,
+        eventDidMount: function(info) {
+            const p = info.event.extendedProps || {};
+            info.el.title =
+                "Actividad: " + (p.actividad || info.event.title) + "\n" +
+                "Responsable: " + (p.responsable || '') + "\n" +
+                "Área/Sesión: " + (p.area || '') + "\n" +
+                "Inicio: " + (info.event.start ? info.event.start.toLocaleString() : '') + "\n" +
+                (info.event.end ? ("Fin: " + info.event.end.toLocaleString() + "\n") : "") +
+                "Registrado: " + (p.creado_en || '');
+        },
+        eventClick: function(info) {
+            const p = info.event.extendedProps || {};
+            const inicio = info.event.start ? info.event.start.toLocaleString() : '';
+            const fin    = info.event.end ? info.event.end.toLocaleString() : '';
+            alert(
+                "📘 Detalle de reserva\n\n" +
+                "Actividad: " + (p.actividad || info.event.title) + "\n" +
+                "Responsable: " + (p.responsable || '') + "\n" +
+                "Área/Sesión: " + (p.area || '') + "\n" +
+                "Inicio: " + inicio + "\n" +
+                (fin ? ("Fin: " + fin + "\n") : "") +
+                "Registrado: " + (p.creado_en || '')
+            );
         }
     });
+
     calendar.render();
 });
 </script>
-
 </body>
 </html>

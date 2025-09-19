@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-07-2025 a las 23:20:51
+-- Tiempo de generación: 19-09-2025 a las 01:52:53
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -33,6 +33,7 @@ CREATE TABLE `agenda_reservas` (
   `hora_inicio` time NOT NULL,
   `hora_fin` time NOT NULL,
   `responsable` varchar(100) NOT NULL,
+  `area_sesion` varchar(250) NOT NULL,
   `actividad` text DEFAULT NULL,
   `creado_en` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -41,10 +42,8 @@ CREATE TABLE `agenda_reservas` (
 -- Volcado de datos para la tabla `agenda_reservas`
 --
 
-INSERT INTO `agenda_reservas` (`id`, `fecha`, `hora_inicio`, `hora_fin`, `responsable`, `actividad`, `creado_en`) VALUES
-(1, '2025-07-15', '10:10:00', '11:00:00', 'LIDER TIC', 'CAPACITACION Y RECORDERIS PLATAFORMAS INSTITUCIONALES DOCENTES (SHIRLY ADALGIZA DOMINGUEZ CARO, KAROL DAYANA BARRIOS GONZALEZ, MAYERLIN IVANAN RAMIREZ CUESTA, KEIDY JOHANNA PACHECO RIPOLL, BRANDO BRYAN FIGUEROA LOPEZ, JAIR BARRIOS CONSUEGRA)', '2025-07-21 13:23:41'),
-(2, '2025-07-15', '11:00:00', '11:50:00', 'LIDER TIC', 'CAPACITACION - RECORDERIS PLATAFORMAS INSTITUCIONALES DOCENTES CONVOCADOS: JHON JAIME CORONADO IBAÑEZ, ELIANA PATRICIA BORJA SIERRA, ALCIDES JEFFRY ESCAFFI CONSUEGRA, GUILLERMO RAFAEL JIMENEZ CORONELL, BLADIMIR FERNANDO MOLINA MASS, BRENDA MARGARITA ROMERO PONCE, NATALIA ANDREA HERNANDEZ BARRAZA.', '2025-07-21 13:53:35'),
-(3, '2025-07-16', '10:10:00', '11:00:00', 'LIDER TIC', 'CAPACITACION Y RECORDERIS PLATAFORMAS INSTITUCIONAL DOCENTES CONVOCADOS: DIANA SOCARRÁS, ELIANETH SALAZAR, PAOLA LECHUGA AVENDAÑO, VALERY BORRERO ARIZA, TALIKA PALACIO SIMOMS, SHEILY ARDILA MOVILLA, SANDRA POLO DE VEGA, MILEIDYS GRANADO HERRERA, CLAUDIA BARROS OROZCO, MARÍA JOSÉ ANGULO PEÑA, YANETH AGUILAR MACIAS, LEIDYS TORRES COLPA, DEIVIS AMORTEGUI ESQUIVIA, JENCY MERCADO ARIZA, , EVELIN JOHANA MONDUL CARPINTERO, JORGE GUERRA MORALES, MAUREN VALENCIA MOSQUERA, KATHERINE SOLÍS, CARMEN CABALLERO,VALENTINA SANMIGUEL, PAULA ZAPATA, PEDRO POSSO DIZ', '2025-07-21 14:31:29');
+INSERT INTO `agenda_reservas` (`id`, `fecha`, `hora_inicio`, `hora_fin`, `responsable`, `area_sesion`, `actividad`, `creado_en`) VALUES
+(7, '2025-08-27', '16:31:00', '17:31:00', 'CARMENZA SANCHEZ', '', 'conversatorio', '2025-08-26 19:32:09');
 
 -- --------------------------------------------------------
 
@@ -68,7 +67,24 @@ CREATE TABLE `auditoria_prestamos` (
 
 INSERT INTO `auditoria_prestamos` (`id`, `prestamo_id`, `libro_id`, `usuario_id`, `nombre_usuario`, `accion`, `fecha`) VALUES
 (7, 1, 2, 1, 'admin', 'devuelto', '2025-07-21 21:20:08'),
-(8, 1, 2, 1, 'admin', 'no_devuelto', '2025-07-21 21:20:11');
+(8, 1, 2, 1, 'admin', 'no_devuelto', '2025-07-21 21:20:11'),
+(9, 2, 3, 3, 'admin', 'devuelto', '2025-07-22 19:13:27'),
+(10, 1, 2, 3, 'admin', 'devuelto', '2025-07-22 19:13:33'),
+(11, 3, 2, 1, 'admin', 'devuelto', '2025-08-26 19:26:24');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `consulta_especializada`
+--
+
+CREATE TABLE `consulta_especializada` (
+  `id` int(11) NOT NULL,
+  `estudiante_id` int(11) NOT NULL,
+  `computador` text NOT NULL,
+  `tema_consulta` text NOT NULL,
+  `fecha_consulta` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -942,7 +958,45 @@ CREATE TABLE `libros` (
 --
 
 INSERT INTO `libros` (`id`, `titulo`, `autor`, `codigo_libro`, `estado`) VALUES
-(2, 'CIEN AÑOS DE SOLEDAD', 'GABRIEL GARCIA MARQUEZ', '0000-1234-0154', 'prestado');
+(2, 'CIEN AÑOS DE SOLEDAD', 'GABRIEL GARCIA MARQUEZ', '0000-1234-0154', 'disponible'),
+(3, 'EL CORONEL NO TIENE QUIEN LE ESCRIBA', 'GABRIEL GARCIA MARQUEZ', '0001-4321-8765-6789', 'disponible');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `llamados_atencion`
+--
+
+CREATE TABLE `llamados_atencion` (
+  `id` int(11) NOT NULL,
+  `estudiante_id` int(11) NOT NULL,
+  `motivo` text NOT NULL,
+  `fecha` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `llamados_atencion`
+--
+
+INSERT INTO `llamados_atencion` (`id`, `estudiante_id`, `motivo`, `fecha`) VALUES
+(1, 1, 'se le hace llamdode atencion a estudiante por no permitir que otro estudiante utilice el pc', '2025-07-23 18:30:33'),
+(11, 1, 'no entrega pc puntual', '2025-07-23 21:02:05'),
+(12, 1, 'prueba', '2025-08-01 16:34:03'),
+(13, 125, 'No respeta las normas en sala de biblioteca comiendo ', '2025-08-26 19:20:51'),
+(14, 125, 'presenta mal comportamineto', '2025-08-26 19:21:26');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `personal_externo`
+--
+
+CREATE TABLE `personal_externo` (
+  `id` int(11) NOT NULL,
+  `nombre_completo` varchar(100) NOT NULL,
+  `documento` varchar(50) NOT NULL,
+  `tipo_personal` enum('docente','administrativo','otro') NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -965,7 +1019,65 @@ CREATE TABLE `prestamos` (
 --
 
 INSERT INTO `prestamos` (`id`, `libro_id`, `estudiante_id`, `grado`, `fecha_prestamo`, `fecha_devolucion`, `devuelto`) VALUES
-(1, 2, 125, ' 8A', '2025-07-21', '2025-07-23', 'no');
+(1, 2, 125, ' 8A', '2025-07-21', '2025-07-23', 'si'),
+(2, 3, 58, ' 9C', '2025-07-22', '2025-07-25', 'si'),
+(3, 2, 566, ' 2C', '2025-07-23', '2025-07-25', 'si');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `prestamo_sala_biblioteca`
+--
+
+CREATE TABLE `prestamo_sala_biblioteca` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `fecha` date NOT NULL,
+  `hora` time NOT NULL,
+  `nombre_completo` varchar(120) NOT NULL,
+  `area_sesion` varchar(120) NOT NULL,
+  `tipo_usuario_id` int(10) UNSIGNED NOT NULL,
+  `actividad` varchar(200) NOT NULL,
+  `requerimientos` text DEFAULT NULL,
+  `observaciones` text DEFAULT NULL,
+  `creado_en` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `prestamo_sala_biblioteca`
+--
+
+INSERT INTO `prestamo_sala_biblioteca` (`id`, `fecha`, `hora`, `nombre_completo`, `area_sesion`, `tipo_usuario_id`, `actividad`, `requerimientos`, `observaciones`, `creado_en`) VALUES
+(1, '2025-08-26', '16:00:00', 'CARLOS', 'logistica', 7, 'capacitación', '1 SILLA Y UN PORTATIL', 'NINGUNA', '2025-08-26 20:07:08'),
+(2, '2025-08-30', '08:00:00', 'sst', 'talento humano', 3, 'capacitacion hsta las 12 pm', 'pc proyector smart tv 40 sillas microfono  agua cafe', 'capacitacon sobre medidas de seguidad y salud en el trabjo', '2025-08-29 13:40:25');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `tipo_usuario_externo`
+--
+
+CREATE TABLE `tipo_usuario_externo` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `tipo_usuario` varchar(80) NOT NULL,
+  `descripcion` varchar(255) DEFAULT NULL,
+  `estado` enum('activo','inactivo') NOT NULL DEFAULT 'activo',
+  `creado_en` timestamp NOT NULL DEFAULT current_timestamp(),
+  `actualizado_en` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tipo_usuario_externo`
+--
+
+INSERT INTO `tipo_usuario_externo` (`id`, `tipo_usuario`, `descripcion`, `estado`, `creado_en`, `actualizado_en`) VALUES
+(1, 'Docente', 'Personal docente del CAB', 'activo', '2025-08-26 19:48:35', '2025-08-26 19:48:35'),
+(2, 'Coordinador', 'Coordinaciones académicas y administrativas', 'activo', '2025-08-26 19:48:35', '2025-08-26 19:48:35'),
+(3, 'Administrativo', 'Personal administrativo', 'activo', '2025-08-26 19:48:35', '2025-08-26 19:48:35'),
+(4, 'Estudiante', 'Estudiantes del CAB', 'activo', '2025-08-26 19:48:35', '2025-08-26 19:48:35'),
+(5, 'Padre de familia', 'Acudientes/Padres', 'activo', '2025-08-26 19:48:35', '2025-08-26 19:48:35'),
+(6, 'Egresado', 'Exalumnos del CAB', 'activo', '2025-08-26 19:48:35', '2025-08-26 19:48:35'),
+(7, 'Visitante externo', 'Invitados, conferencistas, etc.', 'activo', '2025-08-26 19:48:35', '2025-08-26 19:48:35'),
+(8, 'Proveedor', 'Proveedores/contratistas', 'activo', '2025-08-26 19:48:35', '2025-08-26 19:48:35');
 
 -- --------------------------------------------------------
 
@@ -987,7 +1099,8 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `rol`, `creado_en`) VALUES
-(1, 'ALEJANDRO LOPEZ', 'lidertic@colegio-americano.edu.co', '$2y$10$TNDfOh17vTW8zG9HKz0QNO1lIRxvJXuMTiliWbga8/kVW/yzkhste', 'admin', '2025-06-18 19:49:07');
+(1, 'ALEJANDRO LOPEZ', 'lidertic@colegio-americano.edu.co', '$2y$10$TNDfOh17vTW8zG9HKz0QNO1lIRxvJXuMTiliWbga8/kVW/yzkhste', 'admin', '2025-06-18 19:49:07'),
+(3, 'AYDE SOFIA MACKENZIE GUTIÉRREZ', 'a.mackenzie@colegio-americano.edu.co', '$2y$10$G9jSJdryRFwKSN7MmrD5pe8.35H3J6nzQpLMS2Hmb38H7KUB1JYnu', 'admin', '2025-07-22 19:00:35');
 
 --
 -- Índices para tablas volcadas
@@ -1009,6 +1122,13 @@ ALTER TABLE `auditoria_prestamos`
   ADD KEY `usuario_id` (`usuario_id`);
 
 --
+-- Indices de la tabla `consulta_especializada`
+--
+ALTER TABLE `consulta_especializada`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `estudiante_id` (`estudiante_id`);
+
+--
 -- Indices de la tabla `estudiantes`
 --
 ALTER TABLE `estudiantes`
@@ -1022,12 +1142,39 @@ ALTER TABLE `libros`
   ADD UNIQUE KEY `codigo_libro` (`codigo_libro`);
 
 --
+-- Indices de la tabla `llamados_atencion`
+--
+ALTER TABLE `llamados_atencion`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `estudiante_id` (`estudiante_id`);
+
+--
+-- Indices de la tabla `personal_externo`
+--
+ALTER TABLE `personal_externo`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indices de la tabla `prestamos`
 --
 ALTER TABLE `prestamos`
   ADD PRIMARY KEY (`id`),
   ADD KEY `libro_id` (`libro_id`),
   ADD KEY `estudiante_id` (`estudiante_id`);
+
+--
+-- Indices de la tabla `prestamo_sala_biblioteca`
+--
+ALTER TABLE `prestamo_sala_biblioteca`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_tipo_usuario` (`tipo_usuario_id`);
+
+--
+-- Indices de la tabla `tipo_usuario_externo`
+--
+ALTER TABLE `tipo_usuario_externo`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_tipo_usuario` (`tipo_usuario`);
 
 --
 -- Indices de la tabla `usuarios`
@@ -1044,13 +1191,19 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `agenda_reservas`
 --
 ALTER TABLE `agenda_reservas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `auditoria_prestamos`
 --
 ALTER TABLE `auditoria_prestamos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT de la tabla `consulta_especializada`
+--
+ALTER TABLE `consulta_especializada`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `estudiantes`
@@ -1062,19 +1215,43 @@ ALTER TABLE `estudiantes`
 -- AUTO_INCREMENT de la tabla `libros`
 --
 ALTER TABLE `libros`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `llamados_atencion`
+--
+ALTER TABLE `llamados_atencion`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
+-- AUTO_INCREMENT de la tabla `personal_externo`
+--
+ALTER TABLE `personal_externo`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `prestamos`
 --
 ALTER TABLE `prestamos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `prestamo_sala_biblioteca`
+--
+ALTER TABLE `prestamo_sala_biblioteca`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `tipo_usuario_externo`
+--
+ALTER TABLE `tipo_usuario_externo`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Restricciones para tablas volcadas
@@ -1089,11 +1266,29 @@ ALTER TABLE `auditoria_prestamos`
   ADD CONSTRAINT `auditoria_prestamos_ibfk_3` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`);
 
 --
+-- Filtros para la tabla `consulta_especializada`
+--
+ALTER TABLE `consulta_especializada`
+  ADD CONSTRAINT `consulta_especializada_ibfk_1` FOREIGN KEY (`estudiante_id`) REFERENCES `estudiantes` (`id`);
+
+--
+-- Filtros para la tabla `llamados_atencion`
+--
+ALTER TABLE `llamados_atencion`
+  ADD CONSTRAINT `llamados_atencion_ibfk_1` FOREIGN KEY (`estudiante_id`) REFERENCES `estudiantes` (`id`);
+
+--
 -- Filtros para la tabla `prestamos`
 --
 ALTER TABLE `prestamos`
   ADD CONSTRAINT `prestamos_ibfk_1` FOREIGN KEY (`libro_id`) REFERENCES `libros` (`id`),
   ADD CONSTRAINT `prestamos_ibfk_2` FOREIGN KEY (`estudiante_id`) REFERENCES `estudiantes` (`id`);
+
+--
+-- Filtros para la tabla `prestamo_sala_biblioteca`
+--
+ALTER TABLE `prestamo_sala_biblioteca`
+  ADD CONSTRAINT `fk_tipo_usuario_externo` FOREIGN KEY (`tipo_usuario_id`) REFERENCES `tipo_usuario_externo` (`id`) ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

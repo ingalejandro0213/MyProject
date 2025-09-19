@@ -95,7 +95,7 @@ $resultado = $stmt->get_result();
                     <th>Estudiante</th>
                     <th>Grado</th>
                     <th>Fecha de Préstamo</th>
-                    <th>Fecha de Devolución</th>
+                    <th>Fecha Limite para Devolución</th>
                     <th>Devuelto</th>
                 </tr>
             </thead>

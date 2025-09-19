@@ -91,8 +91,16 @@ $estudiantes = $conn->query("SELECT id, nombre_completo FROM estudiantes ORDER B
     <title>Realizar Préstamo - Biblioteca</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+  <?php include __DIR__ . '/header.php'; ?>
 <body class="bg-light">
+   
 <div class="container mt-5">
+    
+    <div class="mb-3 text-start">
+       
+        <a href="dashboard_admin.php" class="btn btn-outline-primary">🏠 Volver a la página principal</a>
+    </div>
+
     <h2 class="text-center mb-4">📚 Realizar Préstamo de Libro</h2>
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -142,5 +150,6 @@ $estudiantes = $conn->query("SELECT id, nombre_completo FROM estudiantes ORDER B
         </div>
     </div>
 </div>
+<?php include __DIR__ . '/footer.php'; ?>
 </body>
 </html>
